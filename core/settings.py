@@ -16,15 +16,18 @@ import os
 from dotenv import load_dotenv
 import dj_database_url
 
-load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
+load_dotenv(BASE_DIR / ".env")
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('django-insecure-%332kuvai9u=ugiq!2ebo%6&c2e3v=sb8md#3tar*q=+115=-k')
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise Exception("SECRET_KEY is missing. Check your environment variables.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
