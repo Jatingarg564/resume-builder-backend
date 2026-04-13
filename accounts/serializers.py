@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, UserSettings
 from django.contrib.auth import authenticate
+
 
 class SignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -16,7 +17,8 @@ class SignupSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
-    
+
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -32,3 +34,31 @@ class LoginSerializer(serializers.Serializer):
 
         data['user'] = user
         return data
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name', 'profile_picture')
+        read_only_fields = ('username', 'email')
+
+    def get_profile_picture(self, obj):
+        if obj.profile_picture:
+            return obj.profile_picture.url
+        return None
+
+
+class UserSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSettings
+        fields = (
+            'theme_preference',
+            'email_notifications',
+            'default_resume_template',
+            'auto_save',
+            'created_at',
+            'updated_at'
+        )
+        read_only_fields = ('created_at', 'updated_at')
