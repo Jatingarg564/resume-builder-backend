@@ -32,7 +32,7 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,resume-builder-backend-z3xm.onrender.com,*.vercel.app,*.onrender.com").split(",") if h.strip()]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,resume-builder-jbyf.onrender.com,*.vercel.app,*.onrender.com").split(",") if h.strip()]
 
 # Media files (uploads)
 MEDIA_URL = '/media/'
