@@ -17,16 +17,23 @@ User = get_user_model()
 
 class SignupView(APIView):
     def post(self, request):
-        serializer = SignupSerializer(data=request.data)
+        try:
+            serializer = SignupSerializer(data=request.data)
 
-        if serializer.is_valid():
-            serializer.save()
+            if serializer.is_valid():
+                user = serializer.save()
+                return Response(
+                    {"message": "User created successfully", "user_id": user.id},
+                    status=status.HTTP_201_CREATED
+                )
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import traceback
             return Response(
-                {"message": "User created successfully"},
-                status=status.HTTP_201_CREATED
+                {"error": str(e), "trace": traceback.format_exc()},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
