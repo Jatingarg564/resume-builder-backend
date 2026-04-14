@@ -32,7 +32,7 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,resume-builder-backend-z3xm.onrender.com,*.vercel.app,*.onrender.com").split(",") if h.strip()]
 
 # Media files (uploads)
 MEDIA_URL = '/media/'
@@ -97,21 +97,25 @@ DATABASES = {
     )
 }
 
-# Cache configuration (Redis)
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django.core.cache.backends.redis.RedisClient",
-        },
-        "KEY_PREFIX": "resume_builder",
+# Cache configuration (Redis - only in production when REDIS_URL is set)
+if os.getenv("REDIS_URL") and not DEBUG:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": os.getenv("REDIS_URL"),
+            "KEY_PREFIX": "resume_builder",
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        }
+    }
 
-# Session configuration
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+# Session configuration (use database sessions for simplicity)
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -181,8 +185,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://resume-builder-backend-z3xm.onrender.com",
+    "https://resume-builder-backend-blue.vercel.app",
+    "https://*.vercel.app",
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = os.getenv("DEBUG", "False") == "True"  # Allow all in dev
 
 # Production security settings
 if not DEBUG:
