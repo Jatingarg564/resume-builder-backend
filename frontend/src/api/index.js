@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -131,6 +131,11 @@ export const versionAPI = {
   getAll: (resumeId) => api.get(`/resumes/${resumeId}/versions/`),
   create: (resumeId) => api.post(`/resumes/${resumeId}/versions/create/`),
   restore: (resumeId, versionNumber) => api.post(`/resumes/${resumeId}/versions/${versionNumber}/restore/`),
+};
+
+// Public Share API
+export const publicAPI = {
+  getResume: (shareCode) => api.get(`/resumes/public/${shareCode}/`),
 };
 
 export default api;

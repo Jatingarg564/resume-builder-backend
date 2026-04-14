@@ -12,6 +12,7 @@ import ResumeView from './pages/ResumeView';
 import Templates from './pages/Templates';
 import Pricing from './pages/Pricing';
 import Profile from './pages/Profile';
+import PublicShareView from './pages/PublicShareView';
 
 // Components
 import Sidebar from './components/Sidebar';
@@ -55,6 +56,7 @@ function App() {
         <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/signup" element={user ? <Navigate to="/dashboard" /> : <Signup />} />
         <Route path="/templates" element={<Templates />} />
+        <Route path="/share/:shareCode" element={<PublicShareView />} />
 
         {/* Protected routes */}
         <Route
