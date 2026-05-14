@@ -188,6 +188,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://resume-builder-backend-z3xm.onrender.com",
     "https://resume-builder-backend-blue.vercel.app",
     "https://*.vercel.app",
+    "https://resume-builder-phi-azure.vercel.app"
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = os.getenv("DEBUG", "False") == "True"  # Allow all in dev
