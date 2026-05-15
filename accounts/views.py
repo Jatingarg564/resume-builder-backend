@@ -10,6 +10,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import UserSettings
+from django.conf import settings
 import logging
 import os
 
@@ -37,7 +38,7 @@ class SignupView(APIView):
         except Exception as e:
             logger.error(f"Signup failed with error: {str(e)}", exc_info=True)
             # Return generic error in production, detailed in debug
-            error_message = str(e) if DEBUG else "An unexpected error occurred. Please try again."
+            error_message = str(e) if settings.DEBUG else "An unexpected error occurred. Please try again."
             return Response(
                 {"error": error_message},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

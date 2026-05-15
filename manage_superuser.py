@@ -12,6 +12,14 @@ if __name__ == '__main__':
     django.setup()
 
     from django.contrib.auth import get_user_model
+    from django.db import connection
+
+    # Check if database tables exist
+    with connection.cursor() as cursor:
+        tables = connection.introspection.table_names()
+        if 'accounts_user' not in tables:
+            print("Database tables not created yet. Run migrations first.")
+            sys.exit(0)
 
     User = get_user_model()
 
