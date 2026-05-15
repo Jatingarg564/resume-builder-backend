@@ -86,6 +86,7 @@ export const resumeAPI = {
 
   // Skills
   addSkill: (resumeId, data) => api.post(`/resumes/${resumeId}/skills/`, data),
+  updateSkill: (skillId, data) => api.patch(`/resumes/skills/${skillId}/`, data),
   deleteSkill: (skillId) => api.delete(`/resumes/skills/${skillId}/`),
 
   // Projects

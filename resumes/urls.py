@@ -7,6 +7,7 @@ from .views import (
     ExperienceCreateView,
     ExperienceUpdateDeleteView,
     SkillCreateDeleteView,
+    SkillUpdateView,
     ProjectCreateView,
     ProjectUpdateDeleteView,
     CoverLetterListCreateView,
@@ -44,7 +45,7 @@ urlpatterns = [
 
     # Skills
     path('<int:resume_id>/skills/', SkillCreateDeleteView.as_view()),
-    path('skills/<int:skill_id>/', SkillCreateDeleteView.as_view()),
+    path('skills/<int:skill_id>/', SkillUpdateView.as_view()),
 
     # Projects
     path('<int:resume_id>/projects/', ProjectCreateView.as_view()),

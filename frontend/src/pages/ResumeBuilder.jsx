@@ -125,6 +125,7 @@ export default function ResumeBuilder() {
         if (item.id) {
           if (section === 'education') await resumeAPI.updateEducation(item.id, item);
           else if (section === 'experience') await resumeAPI.updateExperience(item.id, item);
+          else if (section === 'skills') await resumeAPI.updateSkill(item.id, item);
           else if (section === 'projects') await resumeAPI.updateProject(item.id, item);
         } else {
           if (section === 'education') await resumeAPI.addEducation(resumeId, item);

@@ -9,7 +9,6 @@ from .serializers import (
     ResumeTemplateSerializer, ResumeVersionSerializer,
     JobApplicationSerializer, ResumeAnalyticsSerializer
 )
-import json
 import uuid
 from django.utils import timezone
 import os
@@ -534,6 +533,50 @@ class ExperienceUpdateDeleteView(APIView):
             status=status.HTTP_204_NO_CONTENT
         )
 
+class SkillUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, skill_id):
+        skill = Skill.objects.filter(
+            id=skill_id,
+            resume__user=request.user,
+            resume__is_deleted=False,
+            is_deleted=False
+        ).first()
+
+        if not skill:
+            return Response(
+                {"error": "Skill not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = SkillSerializer(skill, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, skill_id):
+        skill = Skill.objects.filter(
+            id=skill_id,
+            resume__user=request.user,
+            resume__is_deleted=False
+        ).first()
+
+        if not skill:
+            return Response(
+                {"error": "Skill not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        skill.is_deleted = True
+        skill.save()
+        return Response(
+            {"message": "Skill deleted"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+
 class SkillCreateDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -557,26 +600,6 @@ class SkillCreateDeleteView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, skill_id):
-        skill = Skill.objects.filter(
-            id=skill_id,
-            resume__user=request.user,
-            resume__is_deleted=False
-        ).first()
-
-        if not skill:
-            return Response(
-                {"error": "Skill not found"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        skill.is_deleted = True
-        skill.save()
-        return Response(
-            {"message": "Skill deleted"},
-            status=status.HTTP_204_NO_CONTENT
-        )
         
 class ProjectCreateView(APIView):
     permission_classes = [IsAuthenticated]
