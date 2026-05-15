@@ -10,7 +10,10 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import UserSettings
+import logging
 import os
+
+logger = logging.getLogger('accounts')
 
 User = get_user_model()
 
@@ -18,20 +21,25 @@ User = get_user_model()
 class SignupView(APIView):
     def post(self, request):
         try:
+            logger.info(f"Signup attempt with username: {request.data.get('username', 'unknown')}, email: {request.data.get('email', 'unknown')}")
             serializer = SignupSerializer(data=request.data)
 
             if serializer.is_valid():
                 user = serializer.save()
+                logger.info(f"User created successfully: {user.username} (id={user.id})")
                 return Response(
                     {"message": "User created successfully", "user_id": user.id},
                     status=status.HTTP_201_CREATED
                 )
 
+            logger.warning(f"Signup validation failed: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            import traceback
+            logger.error(f"Signup failed with error: {str(e)}", exc_info=True)
+            # Return generic error in production, detailed in debug
+            error_message = str(e) if DEBUG else "An unexpected error occurred. Please try again."
             return Response(
-                {"error": str(e), "trace": traceback.format_exc()},
+                {"error": error_message},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
