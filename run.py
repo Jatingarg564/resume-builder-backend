@@ -13,20 +13,26 @@ print(f"Current directory: {os.getcwd()}", flush=True)
 print(f"DATABASE_URL is set: {'Yes' if os.getenv('DATABASE_URL') else 'No'}", flush=True)
 print(f"PYTHONPATH: {sys.path}", flush=True)
 
+print("\n=== Running database migrations ===", flush=True)
 try:
-    print("\n=== Running database migrations ===", flush=True)
     result = subprocess.run(
         [sys.executable, "manage.py", "migrate", "--noinput"],
-        capture_output=False,
+        capture_output=True,
         text=True,
         cwd=os.getcwd()
     )
+    # Print stdout and stderr so we can see what happened
+    if result.stdout:
+        print(result.stdout, flush=True)
+    if result.stderr:
+        print(result.stderr, flush=True)
+
     if result.returncode != 0:
-        print(f"MIGRATION FAILED with code {result.returncode}", flush=True)
+        print(f"\nMIGRATION FAILED with code {result.returncode}", flush=True)
         sys.exit(1)
-    print("Migrations completed successfully!", flush=True)
+    print("\nMigrations completed successfully!", flush=True)
 except Exception as e:
-    print(f"MIGRATION ERROR: {e}", flush=True)
+    print(f"\nMIGRATION ERROR: {e}", flush=True)
     print(traceback.format_exc(), flush=True)
     sys.exit(1)
 
