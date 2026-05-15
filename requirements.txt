@@ -9,3 +9,4 @@ celery==5.5.3
 redis
 python-dotenv==1.2.1
 Pillow==12.2.0
+whitenoise==6.9.0
