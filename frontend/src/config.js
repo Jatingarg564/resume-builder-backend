@@ -1,1 +1,1 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://resume-builder-phi-azure.vercel.app/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://resume-builder-jbyf.onrender.com/api';
