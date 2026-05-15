@@ -7,6 +7,7 @@ import ToastProvider from './components/ToastProvider'
 import App from './App.jsx'
 import './index.css'
 
+// Resume Builder Frontend
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
