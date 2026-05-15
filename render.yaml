@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: resume-builder-backend
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "python run.py"
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.14.0
+      - key: PIP_INSTALL_DEV_DEPS
+        value: false
