@@ -80,40 +80,9 @@ export default function ResumeBuilder() {
     }
   };
 
-  const handleNext = async () => {
-    if (currentStep === 0) {
-      if (!formData.title.trim()) {
-        addToast('Please enter a resume title', 'error');
-        return;
-      }
-      setLoading(true);
-      try {
-        if (!resumeId) {
-          const resume = await createResume({ title: formData.title });
-          setResumeId(resume.id);
-        }
-        setCurrentStep(1);
-      } catch (err) {
-        addToast('Failed to save resume', 'error');
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setCurrentStep(prev => Math.min(prev + 1, STEPS.length - 1));
-    }
-  };
+  const saveCurrentSection = async () => {
+    if (!resumeId) return false;
 
-  const handleBack = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 0));
-  };
-
-  const handleSaveSection = async () => {
-    if (!resumeId) {
-      addToast('Please save basic info first', 'error');
-      return;
-    }
-
-    setLoading(true);
     try {
       const section = STEPS[currentStep].toLowerCase();
       const data = formData[`${section}`];
@@ -136,15 +105,67 @@ export default function ResumeBuilder() {
           else if (section === 'projects') await resumeAPI.addProject(resumeId, item);
         }
       }
+      return true;
+    } catch (err) {
+      console.error('Save error:', err);
+      return false;
+    }
+  };
 
+  const handleNext = async () => {
+    if (currentStep === 0) {
+      if (!formData.title.trim()) {
+        addToast('Please enter a resume title', 'error');
+        return;
+      }
+      setLoading(true);
+      try {
+        if (!resumeId) {
+          const resume = await createResume({ title: formData.title });
+          setResumeId(resume.id);
+        }
+        setCurrentStep(1);
+      } catch (err) {
+        addToast('Failed to save resume', 'error');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Save current section before moving to next
+      setLoading(true);
+      const saved = await saveCurrentSection();
+      setLoading(false);
+
+      if (saved) {
+        addToast('Section saved', 'success');
+        setCurrentStep(prev => Math.min(prev + 1, STEPS.length - 1));
+      } else {
+        addToast('Failed to save section', 'error');
+      }
+    }
+  };
+
+  const handleBack = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 0));
+  };
+
+  const handleSaveSection = async () => {
+    if (!resumeId) {
+      addToast('Please save basic info first', 'error');
+      return;
+    }
+
+    setLoading(true);
+    const saved = await saveCurrentSection();
+    setLoading(false);
+
+    if (saved) {
       addToast('Section saved successfully', 'success');
       if (currentStep === STEPS.length - 1) {
         navigate('/dashboard');
       }
-    } catch (err) {
+    } else {
       addToast('Failed to save section', 'error');
-    } finally {
-      setLoading(false);
     }
   };
 
