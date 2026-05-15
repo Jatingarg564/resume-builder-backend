@@ -1,2 +1,1 @@
-release: python manage.py migrate --noinput
-web: gunicorn core.wsgi:application --workers 4 --bind 0.0.0.0:$PORT
+web: bash start.sh
