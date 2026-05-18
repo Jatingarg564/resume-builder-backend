@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // Pages
 import Home from './pages/Home';
@@ -50,6 +51,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SpeedInsights />
       {/* Public routes */}
       <Routes>
         <Route path="/" element={<Home />} />
