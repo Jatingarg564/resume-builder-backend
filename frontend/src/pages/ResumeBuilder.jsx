@@ -84,8 +84,23 @@ export default function ResumeBuilder() {
     if (!resumeId) return false;
 
     try {
+      // Map step names to formData keys (plural)
+      const sectionMap = {
+        'basic info': 'title',
+        'education': 'educations',
+        'experience': 'experiences',
+        'skills': 'skills',
+        'projects': 'projects'
+      };
       const section = STEPS[currentStep].toLowerCase();
-      const data = formData[`${section}`];
+      const dataKey = sectionMap[section];
+      const data = formData[dataKey];
+
+      // Guard: ensure data is an array
+      if (!Array.isArray(data)) {
+        console.error(`formData[${dataKey}] is not an array:`, data);
+        return false;
+      }
 
       for (const item of data) {
         // Check if item has any meaningful data (handle both strings and numbers)
@@ -100,24 +115,24 @@ export default function ResumeBuilder() {
         let itemData = { ...item };
 
         // Convert education years to integers
-        if (section === 'education') {
+        if (dataKey === 'educations') {
           if (itemData.start_year) itemData.start_year = parseInt(itemData.start_year, 10);
           if (itemData.end_year && itemData.end_year !== '') itemData.end_year = parseInt(itemData.end_year, 10);
           else delete itemData.end_year;
         }
 
         if (item.id) {
-          if (section === 'education') await resumeAPI.updateEducation(item.id, itemData);
-          else if (section === 'experience') await resumeAPI.updateExperience(item.id, itemData);
-          else if (section === 'skills') await resumeAPI.updateSkill(item.id, itemData);
-          else if (section === 'projects') await resumeAPI.updateProject(item.id, itemData);
+          if (dataKey === 'educations') await resumeAPI.updateEducation(item.id, itemData);
+          else if (dataKey === 'experiences') await resumeAPI.updateExperience(item.id, itemData);
+          else if (dataKey === 'skills') await resumeAPI.updateSkill(item.id, itemData);
+          else if (dataKey === 'projects') await resumeAPI.updateProject(item.id, itemData);
         } else {
-          if (section === 'education') await resumeAPI.addEducation(resumeId, itemData);
-          else if (section === 'experience') await resumeAPI.addExperience(resumeId, itemData);
-          else if (section === 'skills') {
+          if (dataKey === 'educations') await resumeAPI.addEducation(resumeId, itemData);
+          else if (dataKey === 'experiences') await resumeAPI.addExperience(resumeId, itemData);
+          else if (dataKey === 'skills') {
             if (itemData.name?.trim()) await resumeAPI.addSkill(resumeId, { name: itemData.name });
           }
-          else if (section === 'projects') await resumeAPI.addProject(resumeId, itemData);
+          else if (dataKey === 'projects') await resumeAPI.addProject(resumeId, itemData);
         }
       }
       return true;
