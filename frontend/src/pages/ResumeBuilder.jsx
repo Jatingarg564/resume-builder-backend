@@ -88,21 +88,36 @@ export default function ResumeBuilder() {
       const data = formData[`${section}`];
 
       for (const item of data) {
-        const hasData = Object.values(item).some(v => v && v.trim());
+        // Check if item has any meaningful data (handle both strings and numbers)
+        const hasData = Object.values(item).some(v => {
+          if (typeof v === 'number') return v !== null && v !== '';
+          if (typeof v === 'string') return v && v.trim();
+          return v;
+        });
         if (!hasData) continue;
 
+        // Prepare item data for API
+        let itemData = { ...item };
+
+        // Convert education years to integers
+        if (section === 'education') {
+          if (itemData.start_year) itemData.start_year = parseInt(itemData.start_year, 10);
+          if (itemData.end_year && itemData.end_year !== '') itemData.end_year = parseInt(itemData.end_year, 10);
+          else delete itemData.end_year;
+        }
+
         if (item.id) {
-          if (section === 'education') await resumeAPI.updateEducation(item.id, item);
-          else if (section === 'experience') await resumeAPI.updateExperience(item.id, item);
-          else if (section === 'skills') await resumeAPI.updateSkill(item.id, item);
-          else if (section === 'projects') await resumeAPI.updateProject(item.id, item);
+          if (section === 'education') await resumeAPI.updateEducation(item.id, itemData);
+          else if (section === 'experience') await resumeAPI.updateExperience(item.id, itemData);
+          else if (section === 'skills') await resumeAPI.updateSkill(item.id, itemData);
+          else if (section === 'projects') await resumeAPI.updateProject(item.id, itemData);
         } else {
-          if (section === 'education') await resumeAPI.addEducation(resumeId, item);
-          else if (section === 'experience') await resumeAPI.addExperience(resumeId, item);
+          if (section === 'education') await resumeAPI.addEducation(resumeId, itemData);
+          else if (section === 'experience') await resumeAPI.addExperience(resumeId, itemData);
           else if (section === 'skills') {
-            if (item.name?.trim()) await resumeAPI.addSkill(resumeId, { name: item.name });
+            if (itemData.name?.trim()) await resumeAPI.addSkill(resumeId, { name: itemData.name });
           }
-          else if (section === 'projects') await resumeAPI.addProject(resumeId, item);
+          else if (section === 'projects') await resumeAPI.addProject(resumeId, itemData);
         }
       }
       return true;
