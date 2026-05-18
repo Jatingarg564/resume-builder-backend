@@ -121,6 +121,25 @@ export default function ResumeBuilder() {
           else delete itemData.end_year;
         }
 
+        // Convert experience date strings to ISO format (YYYY-MM-DD)
+        if (dataKey === 'experiences') {
+          if (itemData.start_date) {
+            // Parse "Jan 2020" or "2020-01" format to ISO date
+            const date = new Date(itemData.start_date);
+            if (!isNaN(date.getTime())) {
+              itemData.start_date = date.toISOString().split('T')[0];
+            }
+          }
+          if (itemData.end_date && itemData.end_date.trim() !== '' && itemData.end_date.toLowerCase() !== 'present') {
+            const date = new Date(itemData.end_date);
+            if (!isNaN(date.getTime())) {
+              itemData.end_date = date.toISOString().split('T')[0];
+            }
+          } else if (itemData.end_date && itemData.end_date.toLowerCase() === 'present') {
+            delete itemData.end_date;
+          }
+        }
+
         if (item.id) {
           if (dataKey === 'educations') await resumeAPI.updateEducation(item.id, itemData);
           else if (dataKey === 'experiences') await resumeAPI.updateExperience(item.id, itemData);
@@ -138,6 +157,9 @@ export default function ResumeBuilder() {
       return true;
     } catch (err) {
       console.error('Save error:', err);
+      if (err.response?.data) {
+        console.error('Server response:', err.response.data);
+      }
       return false;
     }
   };
