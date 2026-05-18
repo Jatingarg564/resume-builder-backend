@@ -36,46 +36,41 @@ export default function ResumeView() {
   const handleDownloadPDF = async () => {
     setDownloading(true);
     try {
-      const { default: html2canvas } = await import('html2canvas');
-      const { default: jsPDF } = await import('jspdf');
-
-      const element = resumeRef.current;
-      if (!element) {
-        throw new Error('Resume element not found');
+      // Use browser's print-to-pdf functionality for better compatibility
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Could not open print window. Please allow popups for this site.');
       }
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
+      // Get the resume HTML content
+      const resumeContent = resumeRef.current.innerHTML;
 
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      // Create a clean HTML document for printing
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${currentResume?.title || 'Resume'}</title>
+          <style>
+            @page { margin: 0.5in; size: A4; }
+            body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          </style>
+        </head>
+        <body>${resumeContent}</body>
+        </html>
+      `);
+      printWindow.document.close();
 
-      let heightLeft = pdfHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pdf.internal.pageSize.getHeight();
-
-      while (heightLeft > 0) {
-        position = heightLeft - pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pdf.internal.pageSize.getHeight();
-      }
-
-      const resumeTitle = currentResume?.title || 'Resume';
-      pdf.save(`${resumeTitle.replace(/[^a-z0-9]/gi, '_')}.pdf`);
-      addToast('PDF downloaded successfully!', 'success');
+      // Wait for content to load
+      printWindow.onload = () => {
+        printWindow.print();
+        setDownloading(false);
+        addToast('Use the print dialog to save as PDF', 'success');
+      };
     } catch (err) {
       console.error('PDF generation failed:', err);
-      addToast('Failed to generate PDF', 'error');
-    } finally {
+      addToast('Failed to generate PDF: ' + err.message, 'error');
       setDownloading(false);
     }
   };
