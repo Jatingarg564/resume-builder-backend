@@ -102,7 +102,12 @@ export default function ResumeBuilder() {
         return false;
       }
 
-      for (const item of data) {
+      // Track items that were created to update their IDs
+      const itemsToUpdate = [];
+
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
+
         // Check if item has any meaningful data (handle both strings and numbers)
         const hasData = Object.values(item).some(v => {
           if (typeof v === 'number') return v !== null && v !== '';
@@ -146,14 +151,30 @@ export default function ResumeBuilder() {
           else if (dataKey === 'skills') await resumeAPI.updateSkill(item.id, itemData);
           else if (dataKey === 'projects') await resumeAPI.updateProject(item.id, itemData);
         } else {
-          if (dataKey === 'educations') await resumeAPI.addEducation(resumeId, itemData);
-          else if (dataKey === 'experiences') await resumeAPI.addExperience(resumeId, itemData);
+          let response;
+          if (dataKey === 'educations') response = await resumeAPI.addEducation(resumeId, itemData);
+          else if (dataKey === 'experiences') response = await resumeAPI.addExperience(resumeId, itemData);
           else if (dataKey === 'skills') {
-            if (itemData.name?.trim()) await resumeAPI.addSkill(resumeId, { name: itemData.name });
+            if (itemData.name?.trim()) response = await resumeAPI.addSkill(resumeId, { name: itemData.name });
           }
-          else if (dataKey === 'projects') await resumeAPI.addProject(resumeId, itemData);
+          else if (dataKey === 'projects') response = await resumeAPI.addProject(resumeId, itemData);
+
+          // Store the created item with its new ID
+          if (response?.data) {
+            itemsToUpdate.push({ index: i, id: response.data.id });
+          }
         }
       }
+
+      // Update formData with new IDs for created items
+      if (itemsToUpdate.length > 0) {
+        const updatedData = [...data];
+        itemsToUpdate.forEach(({ index, id }) => {
+          updatedData[index] = { ...updatedData[index], id };
+        });
+        setFormData(prev => ({ ...prev, [dataKey]: updatedData }));
+      }
+
       return true;
     } catch (err) {
       console.error('Save error:', err);
