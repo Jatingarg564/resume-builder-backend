@@ -63,6 +63,10 @@ frontend/.rollup.cache/
 .DS_Store
 Thumbs.db
 
+# Claude Code
+.claude/
+start.sh
+
 # Testing
 .coverage
 htmlcov/
